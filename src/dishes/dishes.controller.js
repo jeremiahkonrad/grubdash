@@ -22,22 +22,15 @@ const validateDish = (field) => {
         if (!fieldValue || fieldValue.length === 0) {
           return next({
             status: 400,
-            message: `please provide a value for ${field}`,
+            message: `Dish must include a ${field}`,
           });
         }
         return next();
       case "price":
-        // implicitly checks presence of price
-        if (typeof fieldValue !== "number") {
+        if (typeof fieldValue !== "number" || fieldValue <= 0) {
           return next({
             status: 400,
-            message: `price must be a number`,
-          });
-        }
-        if (fieldValue <= 0) {
-          return next({
-            status: 400,
-            message: `price must be more than 0`,
+            message: `Dish must have a price that is an integer greater than 0`,
           });
         }
         return next();
