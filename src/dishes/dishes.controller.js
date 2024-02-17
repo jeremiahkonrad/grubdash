@@ -1,4 +1,5 @@
 const path = require("path");
+const { validateDish } = require("../utils/validation");
 
 // Use the existing dishes data
 const dishes = require(path.resolve("src/data/dishes-data"));
@@ -10,38 +11,6 @@ const { idsMatch } = require("../utils/validation");
 // TODO: Implement the /dishes handlers needed to make the tests pass
 const list = (req, res) => {
   res.json({ data: dishes });
-};
-
-const validateDish = (field) => {
-  return (req, res, next) => {
-    const fieldValue = req.body.data[field];
-
-    switch (field) {
-      case "description":
-      case "name":
-      case "image_url":
-        if (!fieldValue || fieldValue.length === 0) {
-          return next({
-            status: 400,
-            message: `Dish must include a ${field}`,
-          });
-        }
-        return next();
-      case "price":
-        if (typeof fieldValue !== "number" || fieldValue <= 0) {
-          return next({
-            status: 400,
-            message: `Dish must have a price that is an integer greater than 0`,
-          });
-        }
-        return next();
-      default:
-        return next({
-          status: 400,
-          message: "cannot validate unrecognized field",
-        });
-    }
-  };
 };
 
 const create = (req, res, next) => {

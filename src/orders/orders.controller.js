@@ -5,89 +5,15 @@ const orders = require(path.resolve("src/data/orders-data"));
 
 // Use this function to assigh ID's when necessary
 const nextId = require("../utils/nextId");
-const { idsMatch } = require("../utils/validation");
+const {
+  idsMatch,
+  validOrderDeletionTarget,
+  validateOrder,
+} = require("../utils/validation");
 
 // TODO: Implement the /orders handlers needed to make the tests pass
 const list = (req, res, next) => {
   res.json({ data: orders });
-};
-
-const validateOrder = (field) => {
-  return (req, res, next) => {
-    const fieldValue = req.body.data[field];
-
-    switch (field) {
-      case "deliverTo":
-      case "mobileNumber":
-        if (!fieldValue || fieldValue.length === 0) {
-          return next({
-            status: 400,
-            message: `Order must include a ${field}`,
-          });
-        }
-        return next();
-      case "dishes":
-        if (!fieldValue) {
-          return next({
-            status: 400,
-            message: `Order must include a dish`,
-          });
-        }
-        if (!Array.isArray(fieldValue) || fieldValue.length === 0) {
-          return next({
-            status: 400,
-            message: `Order must include at least one dish`,
-          });
-        }
-        const invalidDishIndex = fieldValue.findIndex(
-          (d) =>
-            d.quantity === undefined ||
-            typeof d.quantity !== "number" ||
-            d.quantity <= 0
-        );
-        if (invalidDishIndex > -1) {
-          return next({
-            status: 400,
-            message: `Dish ${invalidDishIndex} must have a quantity that is an integer greater than 0`,
-          });
-        }
-        return next();
-      case "status":
-        const VALID_STATUSES = [
-          "pending",
-          "preparing",
-          "out-for-delivery",
-          "delivered",
-        ];
-        if (
-          !fieldValue ||
-          fieldValue.length === 0 ||
-          !VALID_STATUSES.includes(fieldValue)
-        ) {
-          return next({
-            status: 400,
-            message: `Order must have a status of pending, preparing, out-for-delivery, delivered`,
-          });
-        }
-        return next();
-      default:
-        return next({
-          status: 400,
-          message: "cannot validate unrecognized field",
-        });
-    }
-  };
-};
-
-const validDeletionTarget = (req, res, next) => {
-  const orderToDelete = res.locals.order;
-  if (orderToDelete.status !== "pending") {
-    return next({
-      status: 400,
-      message: `An order cannot be deleted unless it is pending.`,
-    });
-  }
-  return next();
 };
 
 const create = (req, res, next) => {
@@ -96,6 +22,22 @@ const create = (req, res, next) => {
   orders.push(newOrder);
 
   res.status(201).json({ data: newOrder });
+};
+
+const orderExists = (req, res, next) => {
+  const orderId = req.params.orderId;
+
+  const maybeOrder = orders.find((o) => o.id === orderId);
+
+  if (maybeOrder) {
+    res.locals.order = maybeOrder;
+    return next();
+  }
+
+  return next({
+    status: 404,
+    message: `Order ${orderId} does not exist`,
+  });
 };
 
 const read = (req, res, next) => {
@@ -146,5 +88,5 @@ module.exports = {
     validateOrder("status"),
     update,
   ],
-  destroy: [orderExists, validDeletionTarget, destroy],
+  destroy: [orderExists, validOrderDeletionTarget, destroy],
 };
