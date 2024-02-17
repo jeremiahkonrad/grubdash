@@ -11,6 +11,69 @@ const list = (req, res, next) => {
   res.json({ data: orders });
 };
 
+const validateOrder = (field) => {
+  return (req, res, next) => {
+    const fieldValue = req.body.data[field];
+
+    switch (field) {
+      case "deliverTo":
+      case "mobileNumber":
+        if (!fieldValue || fieldValue.length === 0) {
+          return next({
+            status: 400,
+            message: `Order must include a ${field}`,
+          });
+        }
+        return next();
+      case "dishes":
+        if (!fieldValue) {
+          return next({
+            status: 400,
+            message: `Order must include a dish`,
+          });
+        }
+        if (!Array.isArray(fieldValue) || fieldValue.length === 0) {
+          return next({
+            status: 400,
+            message: `Order must include at least one dish`,
+          });
+        }
+        const invalidDishIndex = fieldValue.findIndex(
+          (d) =>
+            d.quantity === undefined ||
+            typeof d.quantity !== "number" ||
+            d.quantity <= 0
+        );
+        if (invalidDishIndex > -1) {
+          return next({
+            status: 400,
+            message: `Dish ${invalidDishIndex} must have a quantity that is an integer greater than 0`,
+          });
+        }
+        return next();
+      default:
+        return next({
+          status: 400,
+          message: "cannot validate unrecognized field",
+        });
+    }
+  };
+};
+
+const create = (req, res, next) => {
+  const newOrder = { ...req.body.data, id: nextId() };
+
+  orders.push(newOrder);
+
+  res.status(201).json({ data: newOrder });
+};
+
 module.exports = {
   list,
+  create: [
+    validateOrder("deliverTo"),
+    validateOrder("mobileNumber"),
+    validateOrder("dishes"),
+    create,
+  ],
 };
