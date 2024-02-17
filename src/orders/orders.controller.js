@@ -49,6 +49,7 @@ const update = (req, res, next) => {
   const updatedOrder = {
     ...orderToUpdate,
     ...req.body.data,
+    // always use the id from the existing record
     id: orderToUpdate.id,
   };
   const orderIndex = orders.findIndex((o) => o.id === orderToUpdate.id);

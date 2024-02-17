@@ -47,6 +47,7 @@ const update = (req, res, next) => {
   const updatedDish = {
     ...dishToUpdate,
     ...req.body.data,
+    // always use the id from the existing record
     id: dishToUpdate.id,
   };
   const dishIndex = dishes.findIndex((d) => d.id === dishToUpdate.id);
