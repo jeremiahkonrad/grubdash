@@ -5,6 +5,7 @@ const dishes = require(path.resolve("src/data/dishes-data"));
 
 // Use this function to assign ID's when necessary
 const nextId = require("../utils/nextId");
+const { idsMatch } = require("../utils/validation");
 
 // TODO: Implement the /dishes handlers needed to make the tests pass
 const list = (req, res) => {
@@ -72,23 +73,6 @@ const read = (req, res, next) => {
   res.json({ data: res.locals.dish });
 };
 
-const idsMatch = (req, res, next) => {
-  const idFromBody = req.body.data.id;
-
-  if (!idFromBody) return next();
-
-  const idFromRouteParam = req.params.dishId;
-
-  if (idFromBody === idFromRouteParam) {
-    return next();
-  }
-
-  return next({
-    status: 400,
-    message: `Dish id does not match route id. Dish: ${idFromBody}, Route: ${idFromBody}`,
-  });
-};
-
 const update = (req, res, next) => {
   const dishToUpdate = res.locals.dish;
   const updatedDish = {
@@ -114,7 +98,7 @@ module.exports = {
   read: [dishExists, read],
   update: [
     dishExists,
-    idsMatch,
+    idsMatch("Dish", "dishId"),
     validateDish("description"),
     validateDish("name"),
     validateDish("image_url"),

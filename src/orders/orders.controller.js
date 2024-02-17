@@ -88,6 +88,10 @@ const read = (req, res, next) => {
   res.json({ data: res.locals.order });
 };
 
+// const update = (req res, next) => {
+
+// }
+
 module.exports = {
   list,
   create: [
@@ -97,4 +101,12 @@ module.exports = {
     create,
   ],
   read: [orderExists, read],
+  update: [
+    orderExists,
+    idsMatch("Order", "orderId"),
+    validateOrder("deliverTo"),
+    validateOrder("mobileNumber"),
+    validateOrder("dishes"),
+    create,
+  ],
 };
