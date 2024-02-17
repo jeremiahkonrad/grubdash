@@ -58,6 +58,27 @@ const create = (req, res, next) => {
   res.status(201).json({ data: newDish });
 };
 
+const dishExists = (req, res, next) => {
+  const dishId = req.params.dishId;
+
+  const maybeDish = dishes.find((d) => d.id === dishId);
+
+  if (maybeDish) {
+    res.locals.dish = maybeDish;
+
+    return next();
+  }
+
+  return next({
+    status: 404,
+    message: `dish with id ${dishId} does not exist`,
+  });
+};
+
+const read = (req, res, next) => {
+  res.json({ data: res.locals.dish });
+};
+
 module.exports = {
   create: [
     validateDish("description"),
@@ -66,5 +87,6 @@ module.exports = {
     validateDish("price"),
     create,
   ],
+  read: [dishExists, read],
   list,
 };
