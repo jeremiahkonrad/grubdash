@@ -5,6 +5,7 @@ const orders = require(path.resolve("src/data/orders-data"));
 
 // Use this function to assigh ID's when necessary
 const nextId = require("../utils/nextId");
+const { idsMatch } = require("../utils/validation");
 
 // TODO: Implement the /orders handlers needed to make the tests pass
 const list = (req, res, next) => {
@@ -51,6 +52,30 @@ const validateOrder = (field) => {
           });
         }
         return next();
+      case "status":
+        const VALID_STATUSES = [
+          "pending",
+          "preparing",
+          "out-for-delivery",
+          "delivered",
+        ];
+        if (
+          !fieldValue ||
+          fieldValue.length === 0 ||
+          !VALID_STATUSES.includes(fieldValue)
+        ) {
+          return next({
+            status: 400,
+            message: `Order must have a status of pending, preparing, out-for-delivery, delivered`,
+          });
+        }
+        if (fieldValue === "delivered") {
+          return next({
+            status: 400,
+            message: `A delivered order cannot be changed`,
+          });
+        }
+        return next();
       default:
         return next({
           status: 400,
@@ -88,9 +113,19 @@ const read = (req, res, next) => {
   res.json({ data: res.locals.order });
 };
 
-// const update = (req res, next) => {
+const update = (req, res, next) => {
+  const orderToUpdate = res.locals.order;
+  const updatedOrder = {
+    ...orderToUpdate,
+    ...req.body.data,
+    id: orderToUpdate.id,
+  };
+  const orderIndex = orders.findIndex((o) => o.id === orderToUpdate.id);
 
-// }
+  orders[orderIndex] = updatedOrder;
+
+  res.json({ data: updatedOrder });
+};
 
 module.exports = {
   list,
@@ -107,6 +142,7 @@ module.exports = {
     validateOrder("deliverTo"),
     validateOrder("mobileNumber"),
     validateOrder("dishes"),
-    create,
+    validateOrder("status"),
+    update,
   ],
 };
