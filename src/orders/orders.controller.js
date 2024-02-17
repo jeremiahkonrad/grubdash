@@ -69,12 +69,6 @@ const validateOrder = (field) => {
             message: `Order must have a status of pending, preparing, out-for-delivery, delivered`,
           });
         }
-        if (fieldValue === "delivered") {
-          return next({
-            status: 400,
-            message: `A delivered order cannot be changed`,
-          });
-        }
         return next();
       default:
         return next({
@@ -85,28 +79,23 @@ const validateOrder = (field) => {
   };
 };
 
+const validDeletionTarget = (req, res, next) => {
+  const orderToDelete = res.locals.order;
+  if (orderToDelete.status !== "pending") {
+    return next({
+      status: 400,
+      message: `An order cannot be deleted unless it is pending.`,
+    });
+  }
+  return next();
+};
+
 const create = (req, res, next) => {
   const newOrder = { ...req.body.data, id: nextId() };
 
   orders.push(newOrder);
 
   res.status(201).json({ data: newOrder });
-};
-
-const orderExists = (req, res, next) => {
-  const orderId = req.params.orderId;
-
-  const maybeOrder = orders.find((o) => o.id === orderId);
-
-  if (maybeOrder) {
-    res.locals.order = maybeOrder;
-    return next();
-  }
-
-  return next({
-    status: 404,
-    message: `Order ${orderId} does not exist`,
-  });
 };
 
 const read = (req, res, next) => {
@@ -127,6 +116,18 @@ const update = (req, res, next) => {
   res.json({ data: updatedOrder });
 };
 
+const destroy = (req, res, next) => {
+  const orderToDestroy = res.locals.order;
+
+  const orderIndex = orders.findIndex((o) => o.id === orderToDestroy.id);
+
+  if (orderIndex > -1) {
+    orders.splice(orderIndex, 1);
+  }
+
+  res.sendStatus(204);
+};
+
 module.exports = {
   list,
   create: [
@@ -145,4 +146,5 @@ module.exports = {
     validateOrder("status"),
     update,
   ],
+  destroy: [orderExists, validDeletionTarget, destroy],
 };
