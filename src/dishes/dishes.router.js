@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const methodNotAllowed = require("../../../starter-robust-server-structure-paste/src/errors/methodNotAllowed");
+const methodNotAllowed = require("../errors/methodNotAllowed");
 const controller = require("./dishes.controller");
 
 // TODO: Implement the /dishes routes needed to make the tests pass
