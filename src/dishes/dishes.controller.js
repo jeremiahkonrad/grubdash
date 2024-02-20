@@ -8,11 +8,12 @@ const dishes = require(path.resolve("src/data/dishes-data"));
 const nextId = require("../utils/nextId");
 const { idsMatch } = require("../utils/validation");
 
-// TODO: Implement the /dishes handlers needed to make the tests pass
+// Lists all Dishes
 const list = (req, res) => {
   res.json({ data: dishes });
 };
 
+// Creates a new Dish, and adds it to our collection
 const create = (req, res, next) => {
   const newDish = { ...req.body.data, id: nextId() };
 
@@ -21,6 +22,7 @@ const create = (req, res, next) => {
   res.status(201).json({ data: newDish });
 };
 
+// Middleware to check if a Dish exists in our Dishes collection. If not, returns 404.
 const dishExists = (req, res, next) => {
   const dishId = req.params.dishId;
 
@@ -38,10 +40,12 @@ const dishExists = (req, res, next) => {
   });
 };
 
+// Reads a single Dish from our collection
 const read = (req, res, next) => {
   res.json({ data: res.locals.dish });
 };
 
+// Updates a Dish in our collection
 const update = (req, res, next) => {
   const dishToUpdate = res.locals.dish;
   const updatedDish = {

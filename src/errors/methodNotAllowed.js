@@ -1,3 +1,4 @@
+// Middleware used at the end of Route handling chains, to catch unsupported method types
 function methodNotAllowed(request, response, next) {
   next({
     status: 405,

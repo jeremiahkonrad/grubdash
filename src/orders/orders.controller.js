@@ -11,11 +11,12 @@ const {
   validateOrder,
 } = require("../utils/validation");
 
-// TODO: Implement the /orders handlers needed to make the tests pass
+// Lists all Orders in our collection
 const list = (req, res, next) => {
   res.json({ data: orders });
 };
 
+// Creates a new Order, and adds it to our collection
 const create = (req, res, next) => {
   const newOrder = { ...req.body.data, id: nextId() };
 
@@ -24,6 +25,7 @@ const create = (req, res, next) => {
   res.status(201).json({ data: newOrder });
 };
 
+// Middleware to check if an Order exists in our collection. If not, returns 404
 const orderExists = (req, res, next) => {
   const orderId = req.params.orderId;
 
@@ -40,10 +42,12 @@ const orderExists = (req, res, next) => {
   });
 };
 
+// Reads an Order from our collection
 const read = (req, res, next) => {
   res.json({ data: res.locals.order });
 };
 
+// Updates an Order from our collection
 const update = (req, res, next) => {
   const orderToUpdate = res.locals.order;
   const updatedOrder = {
@@ -59,6 +63,7 @@ const update = (req, res, next) => {
   res.json({ data: updatedOrder });
 };
 
+// Removes an Order from our collection
 const destroy = (req, res, next) => {
   const orderToDestroy = res.locals.order;
 
