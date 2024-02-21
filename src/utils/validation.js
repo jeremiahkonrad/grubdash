@@ -1,6 +1,6 @@
 // Middleware to check whether the id in the request body and router parameter match,
 // for a given request and entity type
-const idsMatch = (entity, routerParamId) => {
+function idsMatch(entity, routerParamId) {
   return (req, res, next) => {
     const idFromBody = req.body.data.id;
 
@@ -17,10 +17,10 @@ const idsMatch = (entity, routerParamId) => {
       message: `${entity} Id does not match route id. ${entity}: ${idFromBody}, Route: ${idFromBody}`,
     });
   };
-};
+}
 
 // Middleware that helps validate an Order's attributes
-const validateOrder = (field) => {
+function validateOrder(field) {
   return (req, res, next) => {
     const fieldValue = req.body.data[field];
 
@@ -85,10 +85,10 @@ const validateOrder = (field) => {
         });
     }
   };
-};
+}
 
 // Middleware that guards against deleting an Order if it is pending
-const validOrderDeletionTarget = (req, res, next) => {
+function validOrderDeletionTarget(req, res, next) {
   const orderToDelete = res.locals.order;
   if (orderToDelete.status !== "pending") {
     return next({
@@ -97,10 +97,10 @@ const validOrderDeletionTarget = (req, res, next) => {
     });
   }
   return next();
-};
+}
 
 // Middleware that helps validate a Dish's attributes
-const validateDish = (field) => {
+function validateDish(field) {
   return (req, res, next) => {
     const fieldValue = req.body.data[field];
 
@@ -130,7 +130,7 @@ const validateDish = (field) => {
         });
     }
   };
-};
+}
 
 module.exports = {
   idsMatch,

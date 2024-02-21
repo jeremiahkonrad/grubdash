@@ -9,21 +9,21 @@ const nextId = require("../utils/nextId");
 const { idsMatch } = require("../utils/validation");
 
 // Lists all Dishes
-const list = (req, res) => {
+function list(req, res) {
   res.json({ data: dishes });
-};
+}
 
 // Creates a new Dish, and adds it to our collection
-const create = (req, res, next) => {
+function create(req, res, next) {
   const newDish = { ...req.body.data, id: nextId() };
 
   dishes.push(newDish);
 
   res.status(201).json({ data: newDish });
-};
+}
 
 // Middleware to check if a Dish exists in our Dishes collection. If not, returns 404.
-const dishExists = (req, res, next) => {
+function dishExists(req, res, next) {
   const dishId = req.params.dishId;
 
   const maybeDish = dishes.find((d) => d.id === dishId);
@@ -38,15 +38,15 @@ const dishExists = (req, res, next) => {
     status: 404,
     message: `Dish does not exist: ${dishId}.`,
   });
-};
+}
 
 // Reads a single Dish from our collection
-const read = (req, res, next) => {
+function read(req, res, next) {
   res.json({ data: res.locals.dish });
-};
+}
 
 // Updates a Dish in our collection
-const update = (req, res, next) => {
+function update(req, res, next) {
   const dishToUpdate = res.locals.dish;
   const updatedDish = {
     ...dishToUpdate,
@@ -59,7 +59,7 @@ const update = (req, res, next) => {
   dishes[dishIndex] = updatedDish;
 
   res.json({ data: updatedDish });
-};
+}
 
 module.exports = {
   create: [
